@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from pathlib import Path
 import logging
+import random
 import math
 
 from osmtilecalc.calculators import _lon_to_x, _lat_to_y
@@ -46,10 +47,39 @@ class OSMViewer:
         # Bind escape key to quit
         self.root.bind("<Escape>", on_escape)
 
-        img = Image.open(Path(r"icons\png\a0.png"))
+        # Maps plane categories from API to icons
         self.plane_icons = {
-           1: img
+            2: Image.open(Path(r"icons\png\cessna.png")), # Light (< 15500 lbs),
+            3: Image.open(Path(r"icons\png\glf5.png")), # Small (15500 to 75000 lbs),
+            4: Image.open(Path(r"icons\png\a330.png")), # Large (75000 to 300000 lbs),
+            5: Image.open(Path(r"icons\png\b767.png")), # High Vortex Large (aircraft such as B-757),
+            6: Image.open(Path(r"icons\png\b787.png")), # Heavy (> 300000 lbs),
+            7: Image.open(Path(r"icons\png\a6.png")), # High Performance (> 5g acceleration and 400 kts),
+            8: Image.open(Path(r"icons\png\a7.png")), # Rotorcraft,
+            9: Image.open(Path(r"icons\png\b1.png")), # Glider / sailplane,
+            10: Image.open(Path(r"icons\png\f11.png")), # Lighter-than-air,
+            # 11: ..., # Parachutist / Skydiver,
+            12: Image.open(Path(r"icons\png\b4.png")), # Ultralight / hang-glider / paraglider,
+            # 13: ..., # Reserved,
+            14: Image.open(Path(r"icons\png\b0.png")), # Unmanned Aerial Vehicle,
+            # 15: ..., # Space / Trans-atmospheric vehicle,
+            # 16: ..., # Surface Vehicle – Emergency Vehicle,
+            # 17: ..., # Surface Vehicle – Service Vehicle,
+            # 18: ..., # Point Obstacle (includes tethered balloons),
+            # 19: ..., # Cluster Obstacle,
+            # 20: ..., # Line Obstacle.
         }
+
+        self.filler_plane_icons = (
+            Image.open(Path(r"icons\png\a0.png")),
+            Image.open(Path(r"icons\png\b737.png")),
+            Image.open(Path(r"icons\png\b747.png")),
+            Image.open(Path(r"icons\png\b777.png")),
+            Image.open(Path(r"icons\png\md11.png")),
+            Image.open(Path(r"icons\png\a330.png")),
+            Image.open(Path(r"icons\png\a340.png")),
+            Image.open(Path(r"icons\png\a380.png")),
+        )
     
         # Initial map render
         self.render_map()
@@ -117,6 +147,7 @@ class OSMViewer:
 
     def render_planes(self):
         self.canvas.delete("plane")  # Clear previous tiles
+        self.plane_photoimages = []
 
         home = (self.center_lat, self.center_lon)
         state_data = get_states(use_cache=True)
@@ -143,9 +174,26 @@ class OSMViewer:
             self._draw_plane_as_circle(x, y)
             return
 
-        img = self.plane_icons[1]
+        if plane.category is not None:
+            if plane.category in self.plane_icons:
+                img = self.plane_icons[plane.category]
+                print(f"Using plane category {plane.category}")
+            elif plane.category in (0, 1):
+                if plane.icao24 is not None:
+                    img = self.filler_plane_icons[int(plane.icao24, 16) % len(self.filler_plane_icons)]
+                    print(f"{plane.category=}, using 'random' filler icon from icao id")
+                else:
+                    img = self.filler_plane_icons[0]
+                    print(f"{plane.category=}, but no icao id")
+            else:
+                img = self.filler_plane_icons[0]
+                print(f"No icon for {plane.category=}")
+        else:
+            img = self.filler_plane_icons[0]
+            print(f"{plane.category=}")
+
         if plane.true_track: img = img.rotate(-plane.true_track)
-        img.thumbnail((30,30))
+        img.thumbnail((25,25))
         photo = ImageTk.PhotoImage(img)
         self.plane_photoimages.append(photo)
 
