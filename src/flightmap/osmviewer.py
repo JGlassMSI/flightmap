@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 from pathlib import Path
 import logging
 import random
+import json
 import math
 
 from osmtilecalc.calculators import _lon_to_x, _lat_to_y
@@ -19,11 +20,16 @@ class OSMViewer:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Local OSM Tile Viewer")
+
+        with open("location.json", "r") as f:
+            config = json.load(f)
+
+        self.zoom = config['zoom']
+        self.center_lat = config['lat']
+        self.center_lon = config['lon']
+        self.filter_radius = config['filter_radius']
         
         # Default settings
-        self.zoom = 9  # Initial zoom level
-        self.center_lat = 41.785  # GMSI
-        self.center_lon = -87.580   # GMSI
         self.canvas_width = 1920    # Window width
         self.canvas_height = 1080   # Window height
 
@@ -88,9 +94,10 @@ class OSMViewer:
         self.update_loop()
 
     def update_loop(self):
-        print("update_loop() is rendering planes")
+        logging.debug("update_loop() is rendering planes")
         self.render_planes()
         self.root.after(self.update_time*1000, self.update_loop)
+        logging.debug(f"Planes will update in {self.update_time} seconds")
 
     def render_map(self):
         """Render tiles centered on self.center_lat/center_lon."""
@@ -158,16 +165,17 @@ class OSMViewer:
         home = (self.center_lat, self.center_lon)
         state_data = get_states(use_cache=True)
         states = state_data.states
-        filtered = filter_states(states, *home, 220)
+        filtered = filter_states(states, *home, self.filter_radius)
 
 
-        for plane in filtered:
+        for i, plane in enumerate(filtered):
             tile_x, tile_y = lat_long_zoom_to_tile(
                 plane.latitude,
                 plane.longitude,
-                9
+                self.zoom
             )
             canvas_x, canvas_y = self.tile_loc_to_screen(tile_x, tile_y)
+            print(f"Plane {i} of {len(filtered)} - ", end = "")
             self.draw_plane(canvas_x, canvas_y, plane)
 
     def draw_plane(self, x: float, y: float, plane: StateVector | None = None) -> None:
