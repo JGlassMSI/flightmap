@@ -8,6 +8,8 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "geopy>=2.5.0",
+    "opensky-api",
     "pillow>=12.3.0",
     "requests>=2.34.2",
 ]
@@ -23,3 +25,6 @@ build-backend = "uv_build"
 dev = [
     "osmtilecalc>=1.0.0",
 ]
+
+[tool.uv.sources]
+opensky-api = { git = "https://github.com/openskynetwork/opensky-api.git", subdirectory = "python" }
