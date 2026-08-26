@@ -45,14 +45,15 @@ def make_rotations(base_img: ImageFile.ImageFile) -> dict[int, ImageFile.ImageFi
     return {r: _rotate_and_thumb(base_img, r, 25) for r in range(0, 361, 10)}
 
     
-print("Starting plane rotations")
+print("Pre-generating rotations of included plane icons")
 plane_icons_rotated = {
     index: make_rotations(base_image) for index, base_image in plane_icons_base.items()
 }
-print("Finished plane icon rotations")
+print("Finished generating standard plane icon rotations")
 
+print("Pre-generating rotations of additional plane icons")
 filler_icons_rotated = [make_rotations(base_image) for base_image in filler_plane_icons_base]
-print("Finished filler plane rotations")
+print("Finished generating additions plane rotations")
 
 
 def get_plane_icon(plane: StateVector) -> ImageFile.ImageFile:

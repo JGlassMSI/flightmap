@@ -5,6 +5,9 @@ from pathlib import Path
  
 def get_tile(zoom: int, x: int, y: int, tile_dir: str = "tiles", obey_cache=True) -> str | None:
     """Download an OSM tile and cache it locally. Returns path to cached tile."""
+    # For wide zooms, don't" download impossible tiles
+    if x < 0 or y < 0: return None 
+
     # Create tile directory if it doesn't exist
     tile_path = Path(tile_dir) / str(zoom) / str(x) / f"{y}.png"
     tile_path.parent.mkdir(parents=True, exist_ok=True)

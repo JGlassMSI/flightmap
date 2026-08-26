@@ -2,5 +2,6 @@
     "lat": 41.785,
     "lon": -87.580,
     "zoom": 9,
-    "filter_radius": 220
+    "filter_radius": 220,
+    "refresh_seconds": 20
 }

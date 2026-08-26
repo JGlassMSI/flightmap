@@ -29,12 +29,12 @@ class OSMViewer:
         self.center_lat = config['lat']
         self.center_lon = config['lon']
         self.filter_radius = config['filter_radius']
+        self.update_time= config.get('update_seconds', 60) # seconds
         
         # Default settings
         self.canvas_width = 1920    # Window width
         self.canvas_height = 1080   # Window height
 
-        self.update_time=20 # seconds
         
         # Create canvas for drawing tiles
         self.canvas = tk.Canvas(
@@ -130,12 +130,12 @@ class OSMViewer:
         self.plane_photoimages = []
 
         home = (self.center_lat, self.center_lon)
-        state_data = get_states(False)
+        state_data = get_states(use_cache=True)
         states = state_data.states
-        filtered = filter_states(states, *home, self.filter_radius)
-
+        filtered = filter_states(states, *home, self.filter_radius, max_states=4000)
 
         for i, plane in enumerate(filtered):
+            if not plane.latitude or not plane.longitude: continue
             tile_x, tile_y = lat_long_zoom_to_tile(
                 plane.latitude,
                 plane.longitude,
