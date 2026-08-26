@@ -13,8 +13,16 @@ def get_tile(zoom: int, x: int, y: int, tile_dir: str = "tiles", obey_cache=True
     if obey_cache and tile_path.exists():
         return str(tile_path)
  
-    # Download tile from OSM server
-    url = f"https://a.tile.openstreetmap.org/{zoom}/{x}/{y}.png"
+    if True:
+        # Download tile from OSM server
+        url = f"https://a.tile.openstreetmap.org/{zoom}/{x}/{y}.png"
+    else:
+        # download from cartodb with api key
+        with open("creds.json", "r") as f:
+            creds = json.load(f)
+        key = creds['cartodb']
+        url = f"https://basemaps.cartocdn.com/rastertiles/voyager/{zoom}/{x}/{y}.png?key={key}"
+
     headers = {
         "User-Agent": "Griffin MSI OSM Cache"
     }

@@ -26,6 +26,8 @@ class OSMViewer:
         self.center_lon = -87.580   # GMSI
         self.canvas_width = 1920    # Window width
         self.canvas_height = 1080   # Window height
+
+        self.update_time=20 # seconds
         
         # Create canvas for drawing tiles
         self.canvas = tk.Canvas(
@@ -83,7 +85,12 @@ class OSMViewer:
     
         # Initial map render
         self.render_map()
+        self.update_loop()
+
+    def update_loop(self):
+        print("update_loop() is rendering planes")
         self.render_planes()
+        self.root.after(self.update_time*1000, self.update_loop)
 
     def render_map(self):
         """Render tiles centered on self.center_lat/center_lon."""
@@ -110,7 +117,6 @@ class OSMViewer:
                 tile_path = get_tile(self.zoom, x, y)
                 if not tile_path:
                     continue  # Skip if download failed
-                
                 # Load tile image
                 img = Image.open(tile_path)
                 photo = ImageTk.PhotoImage(img)
