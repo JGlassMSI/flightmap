@@ -23,6 +23,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "cairosvg>=2.9.0",
     "osmtilecalc>=1.0.0",
 ]
 
