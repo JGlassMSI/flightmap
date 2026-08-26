@@ -46,20 +46,16 @@ class OSMViewer:
         
         # Get center tile (x, y)
         center_x, center_y = deg2tile(self.center_lat, self.center_lon, self.zoom)
-        # GMSI should be (131, 190) @ Zoom 9
         
         # Calculate how many tiles fit in the window (with padding)
         tiles_per_side = (
             int(self.canvas_width / 256) + 2,  # +2 to avoid edge gaps
             int(self.canvas_height / 256) + 2
         )
-        # At 1920x1080, should be (9,6)
         
         # Top-left tile to start drawing from
         start_x = center_x - (tiles_per_side[0] // 2)
         start_y = center_y - (tiles_per_side[1] // 2)
-        #(127, 187)
-
         
         # Draw tiles
         for x in range(start_x, start_x + tiles_per_side[0]):
