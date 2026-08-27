@@ -142,7 +142,7 @@ class OSMViewer:
                 self.zoom
             )
             canvas_x, canvas_y = self.tile_loc_to_screen(tile_x, tile_y)
-            print(f"Plane {i} of {len(filtered)} - ", end = "")
+            #print(f"Plane {i} of {len(filtered)} - ", end = "")
             self.draw_plane(canvas_x, canvas_y, plane)
 
     def draw_plane(self, x: float, y: float, plane: StateVector | None = None) -> None:

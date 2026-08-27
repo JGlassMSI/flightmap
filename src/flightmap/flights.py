@@ -12,12 +12,13 @@ def filter_states(states: list[StateVector], lat_deg: float, lon_deg: float, rad
             ((lat_deg), (lon_deg))
         )
     base = [s for s in states if dist(s, lat_deg, lon_deg) < radius_km]
-    if len(base) < max_states: return base
+    print(f"{len(base)} of {len(states)} retained after filtering to {radius_km} km")
+    if len(base) <= max_states: return base
     else: 
         trim_ratio = Fraction(max_states / len(base)).limit_denominator(25)
-        print("TODO NEXT - filter available flights in a smarter way")
-        breakpoint()
-        return base[:max_states]
+        res = [plane for i, plane in enumerate(base) if i % trim_ratio.denominator <= trim_ratio.numerator]
+        print(f"Retained {len(res)} of {len(base)} planes after filtering (by order)")
+        return res
 
 def lat_long_zoom_to_tile(lat_deg: float, lon_deg: float, zoom: int) -> tuple[int, int]:
     x = (lon_deg + 180) / 360 * math.pow(2, zoom)
