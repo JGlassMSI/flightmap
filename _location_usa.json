@@ -2,6 +2,8 @@
     "lat": 37.63,
     "lon": -100.19,
     "zoom": 5,
-    "filter_radius": 4000,
-    "refresh_seconds": 180
+    "filter_radius": 5000,
+    "refresh_seconds": 180,
+    "include_onground": false,
+    "plane_size": 17
 }
