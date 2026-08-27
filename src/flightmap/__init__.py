@@ -5,6 +5,7 @@ import logging
 
 # Inspired by https://www.pythontutorials.net/blog/how-can-i-display-osm-tiles-using-python/
 
+
 def main() -> None:
     logging.basicConfig(level=logging.DEBUG)
 
