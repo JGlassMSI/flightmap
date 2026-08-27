@@ -29,7 +29,7 @@ class OSMViewer:
         self.center_lat = config['lat']
         self.center_lon = config['lon']
         self.filter_radius = config['filter_radius']
-        self.update_time= config.get('update_seconds', 60) # seconds
+        self.update_time= config.get('refresh_seconds', 60) # seconds
         
         # Default settings
         self.canvas_width = 1920    # Window width
@@ -130,7 +130,7 @@ class OSMViewer:
         self.plane_photoimages = []
 
         home = (self.center_lat, self.center_lon)
-        state_data = get_states(use_cache=True)
+        state_data = get_states(use_cache=False)
         states = state_data.states
         filtered = filter_states(states, *home, self.filter_radius, max_states=4000)
 
