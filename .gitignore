@@ -13,4 +13,4 @@ wheels/
 creds.json
 
 # Images
-icons/*_*.png
+icons/**/*_*.png
