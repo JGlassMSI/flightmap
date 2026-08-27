@@ -7,7 +7,7 @@ import logging
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     root = tk.Tk()
     root.attributes("-fullscreen", True)

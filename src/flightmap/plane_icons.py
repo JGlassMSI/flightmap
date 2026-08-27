@@ -5,32 +5,30 @@ from typing import Iterable
 
 from opensky_api import StateVector
 
-
 class ImageSpinner:
     def __init__(self, img_path: Path | str, size=25):
         self.img_path = Path(img_path)
         self._base_img = Image.open(self.img_path)
         self.size = size
 
-    def rotated(self, deg: int, obey_cache: bool = True) -> ImageFile.ImageFile:
+    def rotated(self, deg: int, size:int, obey_cache: bool = True) -> ImageFile.ImageFile:
         cache_path = (
             self.img_path.parent
             / self.img_path.stem
-            / f"{self.img_path.stem}_{deg}.png"
+            / f"{self.img_path.stem}_{deg}_{size}.png"
         )
         cache_path.parent.mkdir(parents=True, exist_ok=True)
 
         if obey_cache and cache_path.exists():
             return Image.open(cache_path)
 
-        resized_and_rotated = _rotate_and_thumb(self._base_img, deg, self.size)
+        resized_and_rotated = _rotate_and_thumb(self._base_img, deg, size)
         resized_and_rotated.save(cache_path)
         return resized_and_rotated
 
-    def precache_rotations(self, deg_list: Iterable[int]) -> None:
+    def precache_rotations(self, deg_list: Iterable[int], size: int) -> None:
         for deg in deg_list:
-            _ = self.rotated(deg, obey_cache=True)
-
+            _ = self.rotated(deg, size, obey_cache=True)
 
 plane_icons_base = {
     2: ImageSpinner(Path(r"icons\png\cessna.png")),  # Light (< 15500 lbs),
@@ -72,54 +70,50 @@ filler_plane_icons_base = (
 )
 
 
-def retieve_rotation(
-    base_img: ImageFile.ImageFile, rot_list: list[int]
-) -> ImageFile.ImageFile: ...
-
-
 def _rotate_and_thumb(img: ImageFile.ImageFile, r, size):
     img = img.rotate(r)
     img.thumbnail((size, size))
     return img
 
 
-def make_rotations(base_img: ImageFile.ImageFile) -> dict[int, ImageFile.ImageFile]:
+class ImageManager:
+    def __init__(self, plane_size: int=25):
+        self.plane_size = plane_size
+        self.make_rotations()
 
-    return {r: _rotate_and_thumb(base_img, r, 25) for r in range(0, 361, 10)}
+    def make_rotations(self):
+        print("Pre-generating rotations of included plane icons")
+        for spinner in plane_icons_base.values():
+            spinner.precache_rotations(range(0, 361, 10), size=self.plane_size)
+        print("Finished generating standard plane icon rotations")
+
+        print("Pre-generating rotations of additional plane icons")
+        for spinner in filler_plane_icons_base:
+            spinner.precache_rotations(range(0, 361, 10), size=self.plane_size)
+        print("Finished generating additions plane rotations")
 
 
-print("Pre-generating rotations of included plane icons")
-for spinner in plane_icons_base.values():
-    spinner.precache_rotations(range(0, 361, 10))
-print("Finished generating standard plane icon rotations")
+    def get_plane_icon(self, plane: StateVector) -> ImageFile.ImageFile:
+        rot = 360 - (round(plane.true_track / 10) * 10)
 
-print("Pre-generating rotations of additional plane icons")
-for spinner in filler_plane_icons_base:
-    spinner.precache_rotations(range(0, 361, 10))
-print("Finished generating additions plane rotations")
-
-
-def get_plane_icon(plane: StateVector) -> ImageFile.ImageFile:
-    rot = 360 - (round(plane.true_track / 10) * 10)
-
-    if plane.category is not None:
-        if plane.category in plane_icons_base:
-            img = plane_icons_base[plane.category].rotated(rot)
-            # print(f"Using plane category {plane.category}")
-        elif plane.category in (0, 1):
-            if plane.icao24 is not None:
-                img = filler_plane_icons_base[
-                    int(plane.icao24, 16) % len(filler_plane_icons_base)
-                ].rotated(rot)
-                # print(f"{plane.category=}, using 'random' filler icon from icao id")
+        if plane.category is not None:
+            if plane.category in plane_icons_base:
+                img = plane_icons_base[plane.category].rotated(rot, self.plane_size)
+                # print(f"Using plane category {plane.category}")
+            elif plane.category in (0, 1):
+                if plane.icao24 is not None:
+                    img = filler_plane_icons_base[
+                        int(plane.icao24, 16) % len(filler_plane_icons_base)
+                    ].rotated(rot, self.plane_size)
+                    # print(f"{plane.category=}, using 'random' filler icon from icao id")
+                else:
+                    img = filler_plane_icons_base[0].rotated(rot, self.plane_size)
+                    # print(f"{plane.category=}, but no icao id")
             else:
-                img = filler_plane_icons_base[0].rotated(rot)
-                # print(f"{plane.category=}, but no icao id")
+                img = filler_plane_icons_base[0].rotated(rot, self.plane_size)
+                # print(f"No icon for {plane.category=}")
         else:
-            img = filler_plane_icons_base[0].rotated(rot)
-            # print(f"No icon for {plane.category=}")
-    else:
-        img = filler_plane_icons_base[0].rotated(rot)
-        # print(f"{plane.category=}")
+            img = filler_plane_icons_base[0].rotated(rot, self.plane_size)
+            # print(f"{plane.category=}")
 
-    return img
+        return img

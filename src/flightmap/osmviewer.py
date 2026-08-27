@@ -11,7 +11,7 @@ from .osm_webservices import get_tile
 from .conversion import deg2tile
 from .opensky_utils import get_states
 from .flights import filter_states, lat_long_zoom_to_tile
-from .plane_icons import get_plane_icon
+from .plane_icons import ImageManager
 
 
 class OSMViewer:
@@ -27,6 +27,8 @@ class OSMViewer:
         self.center_lon = config["lon"]
         self.filter_radius = config["filter_radius"]
         self.update_time = config.get("refresh_seconds", 60)  # seconds
+        self.include_onground = config.get("include_onground", True)
+        self.plane_size = config.get("plane_size", 25)
 
         # Default settings
         self.canvas_width = 1920  # Window width
@@ -37,6 +39,8 @@ class OSMViewer:
             root, width=self.canvas_width, height=self.canvas_height, bg="lightgray"
         )
         self.canvas.pack(fill=tk.BOTH, expand=True)
+
+        self.image_manager = ImageManager(self.plane_size)
 
         # Store references to images (prevents Tkinter garbage collection)
         self.tile_images = []
@@ -122,20 +126,24 @@ class OSMViewer:
         return canvas_x, canvas_y
 
     def render_planes(self):
-        self.canvas.delete("plane")  # Clear previous tiles
+        self.canvas.delete("plane_layer")  # Clear previous tiles
         self.plane_photoimages = []
 
         home = (self.center_lat, self.center_lon)
         state_data = get_states(use_cache=False)
         states = state_data.states
-        filtered = filter_states(states, *home, self.filter_radius, max_states=4000)
+        filtered = filter_states(states, *home, self.filter_radius, include_onground=self.include_onground)
 
         plane_layer = ImageTk.PhotoImage(self.make_plane_layer(filtered))
         self.plane_photoimages.append(plane_layer)
-        self.canvas.create_image(0,0, anchor=tk.NW, image=plane_layer, tags=["plane_layer"])
+        self.canvas.create_image(
+            0, 0, anchor=tk.NW, image=plane_layer, tags=["plane_layer"]
+        )
 
     def make_plane_layer(self, planes: Iterable[StateVector]) -> Image:
-        frame = Image.new("RGBA", (self.canvas_width, self.canvas_height), color=(0,0,0,0))
+        frame = Image.new(
+            "RGBA", (self.canvas_width, self.canvas_height), color=(0, 0, 0, 0)
+        )
         for plane in planes:
             if not plane.latitude or not plane.longitude:
                 continue
@@ -144,6 +152,10 @@ class OSMViewer:
             )
             canvas_x, canvas_y = self.tile_loc_to_screen(tile_x, tile_y)
             # print(f"Plane {i} of {len(filtered)} - ", end = "")
-            img = get_plane_icon(plane)
-            frame.paste(img, (int(canvas_x - img.width/2), int(canvas_y - img.height/2)), mask=img)
+            img = self.image_manager.get_plane_icon(plane)
+            frame.paste(
+                img,
+                (int(canvas_x - img.width / 2), int(canvas_y - img.height / 2)),
+                mask=img,
+            )
         return frame
