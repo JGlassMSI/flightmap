@@ -1,7 +1,7 @@
 import math
 from fractions import Fraction
 
-from opensky_api import OpenSkyApi, OpenSkyStates, StateVector
+from opensky_api import StateVector
 from geopy.distance import geodesic
 
 

@@ -1,12 +1,9 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from pathlib import Path
 import logging
-import random
 import json
 import math
 
-from osmtilecalc.calculators import _lon_to_x, _lat_to_y
 from opensky_api import StateVector
 
 from .osm_webservices import get_tile
