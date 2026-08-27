@@ -11,3 +11,6 @@ wheels/
 
 # Credentials
 creds.json
+
+# Images
+icons/*_*.png
