@@ -1,4 +1,5 @@
 {
+    "_comment": "This is the location data for the Chicago view", 
     "lat": 41.785,
     "lon": -87.580,
     "zoom": 9,

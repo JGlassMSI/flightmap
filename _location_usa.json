@@ -1,4 +1,5 @@
 {
+    "_comment": "This is the location data for the full USA view", 
     "lat": 37.63,
     "lon": -100.19,
     "zoom": 5,
