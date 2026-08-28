@@ -7,7 +7,7 @@ from typing import Iterable
 
 from opensky_api import StateVector
 
-from .osm_webservices import get_tile
+from .osm_webservices import OSM_TileGetter, CartoDB_TileGetter
 from .conversion import deg2tile
 from .opensky_utils import get_states
 from .flights import filter_states, lat_long_zoom_to_tile
@@ -41,6 +41,7 @@ class OSMViewer:
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         self.image_manager = ImageManager(self.plane_size)
+        self.tile_getter = CartoDB_TileGetter(style="light_all")
 
         # Store references to images (prevents Tkinter garbage collection)
         self.tile_images = []
@@ -85,7 +86,7 @@ class OSMViewer:
         for x in range(start_x, start_x + tiles_per_side[0]):
             for y in range(start_y, start_y + tiles_per_side[1]):
                 # Download/cache tile
-                tile_path = get_tile(self.zoom, x, y)
+                tile_path = self.tile_getter.get_tile(self.zoom, x, y)
                 if not tile_path:
                     continue  # Skip if download failed
                 # Load tile image
@@ -130,7 +131,7 @@ class OSMViewer:
         self.plane_photoimages = []
 
         home = (self.center_lat, self.center_lon)
-        state_data = get_states(use_cache=False)
+        state_data = get_states(use_cache=True)
         states = state_data.states
         filtered = filter_states(states, *home, self.filter_radius, include_onground=self.include_onground)
 

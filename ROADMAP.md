@@ -1,6 +1,9 @@
 # Todo List
 
 ## Upcoming
+
+- [ ] Enable auth with opensky to enable higher refresh rate
+
 ### Color
 #### Planes
 - [ ] Allow for alternate colors of planes 
@@ -17,8 +20,7 @@
 - [ ] Add CLI mode to adjust parameters from command line
 
 ### Tiles
-- [ ] Enable pulling from alternate tile providers
-- [ ] Enable auth with opensky to enable higher refresh rate
+- [x] Enable pulling from alternate tile providers
 
 
 ## Complete
