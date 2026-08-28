@@ -31,9 +31,9 @@ class OSMViewer:
         self.include_onground = config.get("include_onground", True)
         self.plane_size = config.get("plane_size", 25)
 
-        # Default settings
-        self.canvas_width = 1920  # Window width
-        self.canvas_height = 1080  # Window height
+        # Fullscreen size
+        self.canvas_width = self.root.winfo_screenwidth()  # Window width
+        self.canvas_height = self.root.winfo_screenheight()  # Window height
 
         # Create canvas for drawing tiles
         self.canvas = tk.Canvas(
@@ -108,9 +108,9 @@ class OSMViewer:
                     canvas_x, canvas_y, anchor=tk.NW, image=photo, tags=["tile"]
                 )
 
-        # Add overshading
+        # Add overshading / dimming on base map
         shadow = Image.new(
-            "RGBA", (self.canvas_width, self.canvas_height), color=(0, 0, 0, 50)
+            "RGBA", (self.canvas_width, self.canvas_height), color=(0, 0, 0, 0)
         )
         shadow_tk = ImageTk.PhotoImage(shadow)
         self.tile_images.append(shadow_tk)  # Keep reference
