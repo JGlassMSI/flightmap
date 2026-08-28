@@ -41,7 +41,7 @@ class OSMViewer:
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         self.image_manager = ImageManager(self.plane_size)
-        self.tile_getter = CartoDB_TileGetter(style="dark_all")
+        self.tile_getter = CartoDB_TileGetter(style="rastertiles/voyager")
 
         # Store references to images (prevents Tkinter garbage collection)
         self.tile_images = []
@@ -106,6 +106,12 @@ class OSMViewer:
                 self.canvas.create_image(
                     canvas_x, canvas_y, anchor=tk.NW, image=photo, tags=["tile"]
                 )
+
+        # Add overshading
+        shadow = Image.new("RGBA", (self.canvas_width, self.canvas_height), color = (0,0,0,150))
+        shadow_tk = ImageTk.PhotoImage(shadow)
+        self.tile_images.append(shadow_tk)  # Keep reference
+        self.canvas.create_image(0,0,anchor=tk.NW,image=shadow_tk, tags=["tile"])
 
     def tile_loc_to_screen(self, x: float, y: float) -> tuple[int, int]:
         # Get center tile (x, y)
