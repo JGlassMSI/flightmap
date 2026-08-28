@@ -10,7 +10,7 @@ from opensky_api import StateVector
 
 from .osm_webservices import OSM_TileGetter, CartoDB_TileGetter
 from .conversion import deg2tile
-from .opensky_utils import get_states
+from .opensky_utils import get_states, get_track
 from .flights import filter_states, lat_long_zoom_to_tile
 from .plane_icons import ImageManager
 
@@ -23,13 +23,17 @@ class OSMViewer:
         with open("location.json", "r") as f:
             config = json.load(f)
 
-        self.zoom = config["zoom"]
-        self.center_lat = config["lat"]
-        self.center_lon = config["lon"]
-        self.filter_radius = config["filter_radius"]
-        self.update_time = config.get("refresh_seconds", 60)  # seconds
-        self.include_onground = config.get("include_onground", True)
-        self.plane_size = config.get("plane_size", 25)
+        self.zoom: float = config["zoom"]
+        self.center_lat: float = config["lat"]
+        self.center_lon: float = config["lon"]
+        self.filter_radius: int = config["filter_radius"]
+        self.update_time: int = config.get("refresh_seconds", 60)  # seconds
+        self.include_onground: bool = config.get("include_onground", True)
+        self.plane_size: int = config.get("plane_size", 25)
+        self.show_fun_tracks: bool = config.get("show_fun_tracks", False)
+        self.max_fun_tracks: int = config.get("max_fun_tracks", 5)
+
+        self.fun_track_planes: list[str] = []
 
         # Fullscreen size
         self.canvas_width = self.root.winfo_screenwidth()  # Window width
@@ -145,6 +149,41 @@ class OSMViewer:
         filtered = filter_states(
             states, *home, self.filter_radius, include_onground=self.include_onground
         )
+
+        # Draw tracks under planes, if desired
+        if self.show_fun_tracks:
+            for plane in self.fun_track_planes:
+                # prune the fun plane tracks based on whether they're still on the map
+                # and possible whether they've landed
+                ...
+            while len(self.fun_track_planes) < self.max_fun_tracks:
+                # Add new planes to fun tracks list based on some heuristic
+                self.fun_track_planes.append(filtered[len(self.fun_track_planes)])
+                # TODO need to check that these planes actually have tracks
+
+            # Draw tracks
+            for plane in self.fun_track_planes:
+                track = get_track(plane.icao24, use_cache=True)
+                if not track: 
+                    print(f"No track available for icao id {plane.icao24}")
+                    continue
+                previous_point = None
+                for waypoint in list(track.path[::-1]):
+                    tile_x, tile_y = lat_long_zoom_to_tile(
+                        waypoint.latitude, waypoint.longitude, self.zoom
+                    )
+                    canvas_x, canvas_y = self.tile_loc_to_screen(tile_x, tile_y)
+                    if not (
+                        (0 <= canvas_x <= self.canvas_width) and
+                        (0 <= canvas_y <= self.canvas_height)
+                    ): # If we're off the screen, bail
+                        continue
+                    if previous_point:
+                        self.canvas.create_line(canvas_x, canvas_y, *previous_point, fill="red")
+                    previous_point = (canvas_x, canvas_y)
+
+            
+
 
         plane_layer = ImageTk.PhotoImage(self.make_plane_layer(filtered))
         self.plane_photoimages.append(plane_layer)

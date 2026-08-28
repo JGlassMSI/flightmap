@@ -5,9 +5,6 @@
 - [ ] Enable auth with opensky to enable higher refresh rate
 
 ### Color
-#### Planes
-- [ ] Show color scale for plane altitude
-
 #### Background
 - [ ] Draw background in pillow instead of tk
 - [ ] Dynamically adjustcolors in background tiles (styles)
@@ -23,6 +20,7 @@
 
 
 ## Complete
+- [x] Show color scale for plane altitude
 - [x] Set plane color by altitude
 - [x] Allow for alternate colors of planes 
 - [x] Enable pulling from alternate tile providers

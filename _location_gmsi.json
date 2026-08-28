@@ -4,6 +4,7 @@
     "lon": -87.580,
     "zoom": 9,
     "filter_radius": 220,
-    "refresh_seconds": 20,
-    "plane_size": 30
+    "refresh_seconds": 300,
+    "plane_size": 30,
+    "show_fun_tracks": false
 }
