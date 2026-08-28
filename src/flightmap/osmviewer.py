@@ -16,9 +16,10 @@ from .plane_icons import ImageManager
 
 
 class OSMViewer:
-    def __init__(self, root: tk.Tk):
+    def __init__(self, root: tk.Tk, use_tile_cache=True):
         self.root = root
         self.root.title("Local OSM Tile Viewer")
+        self.use_tile_cache = use_tile_cache
 
         with open("location.json", "r") as f:
             config = json.load(f)
@@ -144,7 +145,7 @@ class OSMViewer:
         self.plane_photoimages = []
 
         home = (self.center_lat, self.center_lon)
-        state_data = get_states(use_cache=True)
+        state_data = get_states(use_cache=self.use_tile_cache)
         states = state_data.states
         filtered = filter_states(
             states, *home, self.filter_radius, include_onground=self.include_onground
