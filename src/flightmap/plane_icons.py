@@ -1,9 +1,10 @@
 # Maps plane categories from API to icons
-from PIL import Image, ImageFile
+from PIL import Image, ImageFile, ImageChops
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Self
 
 from opensky_api import StateVector
+
 
 class ImageSpinner:
     def __init__(self, img_path: Path | str, size=25):
@@ -11,7 +12,9 @@ class ImageSpinner:
         self._base_img = Image.open(self.img_path)
         self.size = size
 
-    def rotated(self, deg: int, size:int, obey_cache: bool = True) -> ImageFile.ImageFile:
+    def rotated(
+        self, deg: int, size: int, obey_cache: bool = True
+    ) -> ImageFile.ImageFile:
         cache_path = (
             self.img_path.parent
             / self.img_path.stem
@@ -29,6 +32,7 @@ class ImageSpinner:
     def precache_rotations(self, deg_list: Iterable[int], size: int) -> None:
         for deg in deg_list:
             _ = self.rotated(deg, size, obey_cache=True)
+
 
 plane_icons_base = {
     2: ImageSpinner(Path(r"icons\png\cessna.png")),  # Light (< 15500 lbs),
@@ -77,7 +81,7 @@ def _rotate_and_thumb(img: ImageFile.ImageFile, r, size):
 
 
 class ImageManager:
-    def __init__(self, plane_size: int=25):
+    def __init__(self, plane_size: int = 25):
         self.plane_size = plane_size
         self.make_rotations()
 
@@ -92,8 +96,9 @@ class ImageManager:
             spinner.precache_rotations(range(0, 361, 10), size=self.plane_size)
         print("Finished generating additions plane rotations")
 
-
-    def get_plane_icon(self, plane: StateVector) -> ImageFile.ImageFile:
+    def get_plane_icon(
+        self, plane: StateVector, color: tuple[int, int, int] | None = None
+    ) -> ImageFile.ImageFile:
         rot = 360 - (round(plane.true_track / 10) * 10)
 
         if plane.category is not None:
@@ -115,5 +120,41 @@ class ImageManager:
         else:
             img = filler_plane_icons_base[0].rotated(rot, self.plane_size)
             # print(f"{plane.category=}")
+
+        if color:
+            return self.recolor_img(img, color, alpha_tolerance=150)
+
+        return img
+
+    def recolor_img(
+        self: Self,
+        img: ImageFile.ImageFile,
+        new_color: tuple[int, int, int],
+        alpha_tolerance=0,
+    ) -> ImageFile.ImageFile:
+        src_color = (0, 0, 0)
+
+        # Split into R, G, B channels
+        r, g, b, a = img.split()
+
+        # Create binary masks for each channel where the target color exists
+        src_color = (0, 0, 0, 255)  # black
+        _r = r.point(lambda x: 1 if x == src_color[0] else 0, mode="1")
+        _g = g.point(lambda x: 1 if x == src_color[1] else 0, mode="1")
+        _b = b.point(lambda x: 1 if x == src_color[2] else 0, mode="1")
+        _a = a.point(
+            lambda x: 1 if abs(x - src_color[3]) < alpha_tolerance else 0, mode="1"
+        )
+
+        # Combine masks with logical AND to get pixels that match all three channels
+        mask = ImageChops.logical_and(_r, _g)
+        mask = ImageChops.logical_and(mask, _b)
+        mask = ImageChops.logical_and(mask, _a)
+
+        # Create a new image with the replacement color
+        new_img = Image.new("RGBA", img.size, new_color)
+
+        # Paste the replacement color where the mask is True
+        img.paste(new_img, mask=mask)
 
         return img

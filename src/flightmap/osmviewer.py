@@ -41,7 +41,7 @@ class OSMViewer:
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
         self.image_manager = ImageManager(self.plane_size)
-        self.tile_getter = CartoDB_TileGetter(style="light_all")
+        self.tile_getter = CartoDB_TileGetter(style="rastertiles/voyager")
 
         # Store references to images (prevents Tkinter garbage collection)
         self.tile_images = []
@@ -133,7 +133,9 @@ class OSMViewer:
         home = (self.center_lat, self.center_lon)
         state_data = get_states(use_cache=True)
         states = state_data.states
-        filtered = filter_states(states, *home, self.filter_radius, include_onground=self.include_onground)
+        filtered = filter_states(
+            states, *home, self.filter_radius, include_onground=self.include_onground
+        )
 
         plane_layer = ImageTk.PhotoImage(self.make_plane_layer(filtered))
         self.plane_photoimages.append(plane_layer)
@@ -153,7 +155,7 @@ class OSMViewer:
             )
             canvas_x, canvas_y = self.tile_loc_to_screen(tile_x, tile_y)
             # print(f"Plane {i} of {len(filtered)} - ", end = "")
-            img = self.image_manager.get_plane_icon(plane)
+            img = self.image_manager.get_plane_icon(plane, (0, 255, 0, 255))
             frame.paste(
                 img,
                 (int(canvas_x - img.width / 2), int(canvas_y - img.height / 2)),

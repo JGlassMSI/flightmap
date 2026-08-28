@@ -11,7 +11,7 @@ def filter_states(
     lon_deg: float,
     radius_km: float,
     max_states=15000,
-    include_onground = True
+    include_onground=True,
 ) -> list[StateVector]:
     def dist(state: StateVector, lat_deg: float, lon_deg: float):
         return geodesic((state.latitude, state.longitude), ((lat_deg), (lon_deg)))

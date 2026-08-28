@@ -6,7 +6,6 @@
 
 ### Color
 #### Planes
-- [ ] Allow for alternate colors of planes 
 - [ ] Set plane color by altitude
 - [ ] Show color scale for plane altitude
 #### Background
@@ -20,10 +19,12 @@
 - [ ] Add CLI mode to adjust parameters from command line
 
 ### Tiles
-- [x] Enable pulling from alternate tile providers
+- Continue exploring other tile providers
 
 
 ## Complete
+- [x] Allow for alternate colors of planes 
+- [x] Enable pulling from alternate tile providers
 - [x] Generate image in Pillow instead of in tk
 - [x] Cache all the pre-generated plane rotations instead of generating them at startup
 - [x] Filter available flights in a smart way

@@ -8,12 +8,10 @@ from typing import Self
 
 class TileGetter(ABC):
     @abstractmethod
-    def create_download_url(zoom: int, x: int, y: int) -> str:
-        ...
+    def create_download_url(zoom: int, x: int, y: int) -> str: ...
 
     @abstractmethod
-    def get_tile_path(zoom: int, x:int, y:int) -> str:
-        ...
+    def get_tile_path(zoom: int, x: int, y: int) -> str: ...
 
     def get_tile(
         self: TileGetter,
@@ -29,7 +27,7 @@ class TileGetter(ABC):
             return None
 
         # Create tile directory if it doesn't exist
-        tile_path = self.get_tile_path(zoom,x, y)
+        tile_path = self.get_tile_path(zoom, x, y)
         tile_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Return cached tile if it exists
@@ -58,11 +56,12 @@ class TileGetter(ABC):
             print(f"Got tile at {z=}, {x=}, {y=}")
             # sleep(random() * 2 + .5)
 
+
 class OSM_TileGetter(TileGetter):
     def create_download_url(self: Self, zoom: int, x: int, y: int) -> str:
         return f"https://a.tile.openstreetmap.org/{zoom}/{x}/{y}.png"
 
-    def get_tile_path(self: Self, zoom: int, x:int, y:int) -> str:
+    def get_tile_path(self: Self, zoom: int, x: int, y: int) -> str:
         return Path("tiles") / "osm" / str(zoom) / str(x) / f"{y}.png"
 
 
@@ -78,6 +77,7 @@ class OSM_TileGetter(TileGetter):
 # "rastertiles/voyager_only_labels"
 # "rastertiles/voyager_labels_under"
 
+
 class CartoDB_TileGetter(TileGetter):
     def __init__(self, style: CartDBStyle | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -87,10 +87,20 @@ class CartoDB_TileGetter(TileGetter):
         with open("creds.json", "r") as f:
             creds = json.load(f)
         key = creds["cartodb"]
-        return f"https://basemaps.cartocdn.com/{self.style}/{zoom}/{x}/{y}.png?key={key}"
+        return (
+            f"https://basemaps.cartocdn.com/{self.style}/{zoom}/{x}/{y}.png?key={key}"
+        )
 
-    def get_tile_path(self: Self, zoom: int, x:int, y:int) -> str:
-        return Path("tiles") / "cartodb" / f"{self.style.replace("/", "_")}" / str(zoom) / str(x) / f"{y}.png"
+    def get_tile_path(self: Self, zoom: int, x: int, y: int) -> str:
+        return (
+            Path("tiles")
+            / "cartodb"
+            / f"{self.style.replace('/', '_')}"
+            / str(zoom)
+            / str(x)
+            / f"{y}.png"
+        )
+
 
 def make_tilelist(
     lat_deg: float, lon_deg: float, radius_km: int, zoom: int
