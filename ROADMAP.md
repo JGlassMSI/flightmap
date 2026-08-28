@@ -6,7 +6,6 @@
 
 ### Color
 #### Planes
-- [ ] Set plane color by altitude
 - [ ] Show color scale for plane altitude
 #### Background
 - [ ] Draw background in pillow instead of tk
@@ -23,6 +22,7 @@
 
 
 ## Complete
+- [x] Set plane color by altitude
 - [x] Allow for alternate colors of planes 
 - [x] Enable pulling from alternate tile providers
 - [x] Generate image in Pillow instead of in tk

@@ -79,7 +79,7 @@ class OSM_TileGetter(TileGetter):
 
 
 class CartoDB_TileGetter(TileGetter):
-    def __init__(self, style: CartDBStyle | None = None, *args, **kwargs):
+    def __init__(self, style: str | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.style = style if style else "rastertiles/voyager"
 
