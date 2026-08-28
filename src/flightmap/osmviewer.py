@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font as tkFont
 from PIL import Image, ImageTk
 import logging
 import json
@@ -108,10 +109,12 @@ class OSMViewer:
                 )
 
         # Add overshading
-        shadow = Image.new("RGBA", (self.canvas_width, self.canvas_height), color = (0,0,0,120))
+        shadow = Image.new(
+            "RGBA", (self.canvas_width, self.canvas_height), color=(0, 0, 0, 50)
+        )
         shadow_tk = ImageTk.PhotoImage(shadow)
         self.tile_images.append(shadow_tk)  # Keep reference
-        self.canvas.create_image(0,0,anchor=tk.NW,image=shadow_tk, tags=["tile"])
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=shadow_tk, tags=["tile"])
 
     def tile_loc_to_screen(self, x: float, y: float) -> tuple[int, int]:
         # Get center tile (x, y)
@@ -147,6 +150,36 @@ class OSMViewer:
         self.plane_photoimages.append(plane_layer)
         self.canvas.create_image(
             0, 0, anchor=tk.NW, image=plane_layer, tags=["plane_layer"]
+        )
+
+        # render altitude scale
+        scale_dims = (400, 30)
+        scale_loc = (self.canvas_width - 50, self.canvas_height - 50)
+
+        scale = ImageTk.PhotoImage(
+            self.image_manager.generate_altitude_key(*scale_dims)
+        )
+        self.plane_photoimages.append(scale)
+        self.canvas.create_image(
+            *scale_loc, anchor=tk.SE, image=scale, tags=["plane_layer"]
+        )
+        header_font = tkFont.Font(family="Arial", size=24, weight=tkFont.NORMAL)
+        self.canvas.create_text(
+            (scale_loc[0], scale_loc[1] - 30),
+            text="Altitude (ft)",
+            font=header_font,
+            anchor=tk.SE,
+        )
+
+        label_font = tkFont.Font(family="Arial", size=16, weight=tkFont.NORMAL)
+        self.canvas.create_text(
+            (scale_loc[0] - scale_dims[0], scale_loc[1]),
+            text="0",
+            font=label_font,
+            anchor=tk.NW,
+        )
+        self.canvas.create_text(
+            (scale_loc[0], scale_loc[1]), text="46,000", font=label_font, anchor=tk.NE
         )
 
     def make_plane_layer(self, planes: Iterable[StateVector]) -> Image:

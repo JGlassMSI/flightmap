@@ -7,6 +7,7 @@
 ### Color
 #### Planes
 - [ ] Show color scale for plane altitude
+
 #### Background
 - [ ] Draw background in pillow instead of tk
 - [ ] Dynamically adjustcolors in background tiles (styles)

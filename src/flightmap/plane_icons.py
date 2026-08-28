@@ -82,7 +82,9 @@ def _rotate_and_thumb(img: ImageFile.ImageFile, r, size):
 
 
 class ImageManager:
-    MAX_HEIGHT = 40_000
+    MAX_HEIGHT = 14_000  # meters
+    MAX_HUE = 0.8
+
     def __init__(self, plane_size: int = 25):
         self.plane_size = plane_size
         self.make_rotations()
@@ -99,8 +101,7 @@ class ImageManager:
         print("Finished generating additions plane rotations")
 
     def get_plane_icon(
-        self, plane: StateVector,
-        color: bool = True
+        self, plane: StateVector, color: bool = True
     ) -> ImageFile.ImageFile:
         rot = 360 - (round(plane.true_track / 10) * 10)
 
@@ -125,25 +126,17 @@ class ImageManager:
             # print(f"{plane.category=}")
 
         if color:
-            if plane.baro_altitude: altitude = plane.baro_altitude
-            elif plane.geo_altitude: altitude = plane.geo_altitude
-            else: altitude = 0
+            if plane.baro_altitude:
+                altitude = plane.baro_altitude
+            elif plane.geo_altitude:
+                altitude = plane.geo_altitude
+            else:
+                altitude = 0
 
             color = self.altitude_to_rgb(altitude)
             return self.recolor_img(img, color, alpha_tolerance=30)
 
         return img
-
-    def altitude_to_rgb(self: Self, altitude: int) -> tuple[int,int,int]:
-        hue = min(altitude / self.MAX_HEIGHT, 1)  # clamp higher altitudes to max
-        saturation = 1.0           
-        lightness = 0.5            
-
-        # Convert HLS (colorsys uses HLS, not HSL) to RGB (0–1 range)
-        r, g, b = colorsys.hls_to_rgb(hue, lightness, saturation)
-
-        # Convert to 0–255 integer RGB values
-        return tuple(int(x * 255) for x in (r, g, b))
 
     def recolor_img(
         self: Self,
@@ -177,3 +170,24 @@ class ImageManager:
         img.paste(new_img, mask=mask)
 
         return img
+
+    def altitude_to_rgb(self: Self, altitude: float) -> tuple[int, int, int]:
+        hue = min(
+            (altitude * self.MAX_HUE) / (self.MAX_HEIGHT), self.MAX_HUE
+        )  # clamp higher altitudes to max
+        saturation = 1.0
+        lightness = 0.5
+
+        # Convert HLS (colorsys uses HLS, not HSL) to RGB (0–1 range)
+        r, g, b = colorsys.hls_to_rgb(hue, lightness, saturation)
+
+        # Convert to 0–255 integer RGB values
+        return tuple(int(x * 255) for x in (r, g, b))
+
+    def generate_altitude_key(self: Self, width: int, height: int):
+        scale = Image.new("RGB", (width, height))
+        for x in range(width):
+            color = self.altitude_to_rgb((x / width) * self.MAX_HEIGHT)
+            for y in range(height):
+                scale.putpixel((x, y), color)
+        return scale

@@ -4,5 +4,6 @@
     "lon": -87.580,
     "zoom": 9,
     "filter_radius": 220,
-    "refresh_seconds": 20
+    "refresh_seconds": 20,
+    "plane_size": 30
 }
