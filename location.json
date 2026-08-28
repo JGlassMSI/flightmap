@@ -1,11 +1,10 @@
 {
-    "_comment": "This is the location data for the full USA view", 
-    "lat": 37.63,
-    "lon": -100.19,
-    "zoom": 5,
-    "filter_radius": 5000,
+    "_comment": "This is the location data for the Chicago view", 
+    "lat": 41.785,
+    "lon": -87.580,
+    "zoom": 9,
+    "filter_radius": 220,
     "refresh_seconds": 300,
-    "include_onground": false,
-    "plane_size": 17,
+    "plane_size": 30,
     "show_fun_tracks": false
 }

@@ -11,5 +11,5 @@ def main() -> None:
 
     root = tk.Tk()
     root.attributes("-fullscreen", True)
-    app = OSMViewer(root, use_tile_cache=False)
+    app = OSMViewer(root, use_state_cache=True)
     root.mainloop()
