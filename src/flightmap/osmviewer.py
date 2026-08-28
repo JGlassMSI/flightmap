@@ -108,7 +108,7 @@ class OSMViewer:
                 )
 
         # Add overshading
-        shadow = Image.new("RGBA", (self.canvas_width, self.canvas_height), color = (0,0,0,150))
+        shadow = Image.new("RGBA", (self.canvas_width, self.canvas_height), color = (0,0,0,120))
         shadow_tk = ImageTk.PhotoImage(shadow)
         self.tile_images.append(shadow_tk)  # Keep reference
         self.canvas.create_image(0,0,anchor=tk.NW,image=shadow_tk, tags=["tile"])
